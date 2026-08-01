@@ -1,8 +1,13 @@
 import Link from "next/link";
 
+export const dynamic = "force-static";
+
 export const metadata = {
   title: "Офлайн",
 };
+
+const isGitHubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
+const homeHref = isGitHubPages ? "/" : "/app";
 
 export default function OfflinePage() {
   return (
@@ -19,22 +24,24 @@ export default function OfflinePage() {
       </div>
       <div className="flex flex-wrap gap-3">
         <Link
-          href="/app"
+          href={homeHref}
           className="inline-flex h-11 items-center rounded-xl bg-accent px-5 text-sm font-medium text-accent-foreground"
         >
-          На Dashboard
+          {isGitHubPages ? "На главную" : "На Dashboard"}
         </Link>
         <a
-          href="/app"
+          href={homeHref}
           className="inline-flex h-11 items-center rounded-xl border border-border px-5 text-sm font-medium"
         >
           Повторить
         </a>
       </div>
-      <ul className="list-inside list-disc space-y-1 text-sm text-muted">
-        <li>Чтение: кэш service worker (последние страницы)</li>
-        <li>Запись: только онлайн (этап 11, v1)</li>
-      </ul>
+      {!isGitHubPages ? (
+        <ul className="list-inside list-disc space-y-1 text-sm text-muted">
+          <li>Чтение: кэш service worker (последние страницы)</li>
+          <li>Запись: только онлайн (этап 11, v1)</li>
+        </ul>
+      ) : null}
     </main>
   );
 }

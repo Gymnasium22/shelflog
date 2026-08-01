@@ -1,7 +1,5 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import {
@@ -9,20 +7,14 @@ import {
   type InviteRole,
 } from "@/entities/household/model/roles";
 import type { MemberRole } from "@/entities/household/model/types";
-import { createClient } from "@/shared/api/supabase/server";
-import { getActiveHouseholdContext } from "@/shared/lib/household";
+import { createClient } from "@/shared/api/supabase/client";
 import { getAppOrigin } from "@/shared/lib/app-url";
+import { getActiveHouseholdContextClient } from "@/shared/lib/household-client";
+import type { ActionState as BaseActionState } from "@/shared/types/action-state";
 
-export type ActionState = {
-  ok: boolean;
-  message: string | null;
+export type ActionState = BaseActionState & {
   inviteUrl?: string | null;
 };
-
-function revalidateFamily() {
-  revalidatePath("/app/family");
-  revalidatePath("/app");
-}
 
 export async function createInviteAction(
   _prev: ActionState,
@@ -45,7 +37,7 @@ export async function createInviteAction(
     return { ok: false, message: email.error.issues[0]?.message ?? "Email" };
   }
 
-  const ctx = await getActiveHouseholdContext();
+  const ctx = await getActiveHouseholdContextClient();
   if (!ctx) return { ok: false, message: "Сначала создайте дом" };
   if (ctx.role !== "owner" && ctx.role !== "admin") {
     return { ok: false, message: "Недостаточно прав" };
@@ -54,7 +46,7 @@ export async function createInviteAction(
     return { ok: false, message: "Только владелец может пригласить админа" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase.rpc("create_invitation", {
     p_household_id: ctx.household.id,
     p_role: roleParsed.data as InviteRole,
@@ -73,7 +65,6 @@ export async function createInviteAction(
   }
 
   const inviteUrl = `${getAppOrigin()}/invite/${token}`;
-  revalidateFamily();
 
   return {
     ok: true,
@@ -82,20 +73,21 @@ export async function createInviteAction(
   };
 }
 
-export async function revokeInviteAction(invitationId: string): Promise<ActionState> {
-  const ctx = await getActiveHouseholdContext();
+export async function revokeInviteAction(
+  invitationId: string,
+): Promise<ActionState> {
+  const ctx = await getActiveHouseholdContextClient();
   if (!ctx || (ctx.role !== "owner" && ctx.role !== "admin")) {
     return { ok: false, message: "Недостаточно прав" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.rpc("revoke_invitation", {
     p_invitation_id: invitationId,
   });
 
   if (error) return { ok: false, message: error.message };
 
-  revalidateFamily();
   return { ok: true, message: "Приглашение отозвано" };
 }
 
@@ -103,12 +95,12 @@ export async function updateMemberRoleAction(
   memberId: string,
   role: MemberRole,
 ): Promise<ActionState> {
-  const ctx = await getActiveHouseholdContext();
+  const ctx = await getActiveHouseholdContextClient();
   if (!ctx || (ctx.role !== "owner" && ctx.role !== "admin")) {
     return { ok: false, message: "Недостаточно прав" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.rpc("update_member_role", {
     p_member_id: memberId,
     p_role: role,
@@ -116,33 +108,29 @@ export async function updateMemberRoleAction(
 
   if (error) return { ok: false, message: error.message };
 
-  revalidateFamily();
   return { ok: true, message: "Роль обновлена" };
 }
 
 export async function removeMemberAction(memberId: string): Promise<ActionState> {
-  const ctx = await getActiveHouseholdContext();
+  const ctx = await getActiveHouseholdContextClient();
   if (!ctx) return { ok: false, message: "Нет дома" };
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.rpc("remove_member", {
     p_member_id: memberId,
   });
 
   if (error) return { ok: false, message: error.message };
 
-  revalidateFamily();
-
-  // If left own household
   if (ctx.membership.id === memberId) {
-    redirect("/app");
+    return { ok: true, message: "Вы вышли из дома", redirectTo: "/app" };
   }
 
   return { ok: true, message: "Участник удалён" };
 }
 
 export async function acceptInviteAction(token: string): Promise<ActionState> {
-  const supabase = await createClient();
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -160,8 +148,7 @@ export async function acceptInviteAction(token: string): Promise<ActionState> {
   }
 
   void data;
-  revalidateFamily();
-  redirect("/app");
+  return { ok: true, message: null, redirectTo: "/app" };
 }
 
 function mapInviteError(message: string): string {
