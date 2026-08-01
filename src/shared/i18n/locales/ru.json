@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "ShelfLog",
+    "tagline": "Цифровой паспорт дома"
+  },
+  "currency": {
+    "default": "BYN",
+    "defaultName": "Белорусский рубль"
+  },
+  "nav": {
+    "home": "Главная",
+    "health": "Проверка",
+    "login": "Вход",
+    "signup": "Регистрация",
+    "logout": "Выйти"
+  },
+  "auth": {
+    "loginTitle": "Вход",
+    "signupTitle": "Регистрация",
+    "magicLink": "Magic link",
+    "password": "Пароль"
+  }
+}

@@ -1,0 +1,37 @@
+# Supabase local/CLI config (free tier project linked via `supabase link`)
+# https://supabase.com/docs/guides/cli/config
+
+project_id = "shelflog"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+  "http://localhost:3000/**",
+  "http://localhost:3000/auth/callback",
+  "http://127.0.0.1:3000/**",
+  "http://127.0.0.1:3000/auth/callback",
+]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+# For local/dev MVP: allow login without confirming email.
+# Remote project: set the same in Dashboard → Authentication → Providers → Email
+# (Confirm email = OFF) until you configure custom SMTP.
+enable_confirmations = false

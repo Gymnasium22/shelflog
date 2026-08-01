@@ -1,0 +1,13 @@
+# Single app — workspace settings for pnpm 10+
+packages:
+  - "."
+
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver
+  - supabase
+
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+  supabase: true
