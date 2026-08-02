@@ -14,6 +14,7 @@ import { DeleteButton } from "@/local-app/ui/delete-button";
 import { EmptyState } from "@/local-app/ui/empty-state";
 import { NeedHousehold } from "@/local-app/ui/need-household";
 import { PageHeader } from "@/local-app/ui/page-header";
+import { Surface } from "@/local-app/ui/surface";
 import {
   createLocation,
   deleteLocation,
@@ -55,7 +56,7 @@ export default function LocalLocationsPage() {
   useEffect(() => {
     refresh();
     setReady(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload on nav
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   function handleCreate(e: React.FormEvent) {
@@ -88,67 +89,68 @@ export default function LocalLocationsPage() {
   }
 
   if (!ready) {
-    return <div className="h-40 animate-pulse rounded-2xl bg-card" />;
+    return <div className="h-40 animate-pulse rounded-3xl bg-card/60" />;
   }
 
   if (!hasHousehold) return <NeedHousehold />;
 
   return (
-    <main className="space-y-8">
+    <main className="space-y-7">
       <PageHeader
         title="Места хранения"
         description="Комнаты, шкафы, полки — иерархия на этом устройстве."
       />
 
-      <form
-        onSubmit={handleCreate}
-        className="space-y-4 rounded-2xl border border-border bg-card p-6"
-      >
-        <div>
-          <Label htmlFor="loc-name">Название</Label>
-          <Input
-            id="loc-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            placeholder="Кухня, шкаф…"
-            className="mt-1.5"
-          />
-        </div>
-        <div>
-          <Label htmlFor="loc-type">Тип</Label>
-          <Select
-            id="loc-type"
-            value={type}
-            onChange={(e) => setType(e.target.value as LocationType)}
-          >
-            {LOCATION_TYPES.filter((t) => t !== "home").map((t) => (
-              <option key={t} value={t}>
-                {LOCATION_TYPE_LABELS[t]}
-              </option>
-            ))}
-          </Select>
-        </div>
-        {locations.length > 0 ? (
+      <Surface className="animate-fade-up animate-fade-up-delay-1 space-y-4">
+        <form onSubmit={handleCreate} className="space-y-4">
           <div>
-            <Label htmlFor="loc-parent">Внутри</Label>
-            <Select
-              id="loc-parent"
-              value={parentId}
-              onChange={(e) => setParentId(e.target.value)}
+            <Label htmlFor="loc-name">Название</Label>
+            <Input
+              id="loc-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
-            >
-              {locations.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.path}
-                </option>
-              ))}
-            </Select>
+              placeholder="Кухня, шкаф…"
+              className="mt-1.5"
+            />
           </div>
-        ) : null}
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
-        <Button type="submit">Добавить место</Button>
-      </form>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="loc-type">Тип</Label>
+              <Select
+                id="loc-type"
+                value={type}
+                onChange={(e) => setType(e.target.value as LocationType)}
+              >
+                {LOCATION_TYPES.filter((t) => t !== "home").map((t) => (
+                  <option key={t} value={t}>
+                    {LOCATION_TYPE_LABELS[t]}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            {locations.length > 0 ? (
+              <div>
+                <Label htmlFor="loc-parent">Внутри</Label>
+                <Select
+                  id="loc-parent"
+                  value={parentId}
+                  onChange={(e) => setParentId(e.target.value)}
+                  required
+                >
+                  {locations.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.path}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            ) : null}
+          </div>
+          {error ? <p className="text-sm text-danger">{error}</p> : null}
+          <Button type="submit">Добавить место</Button>
+        </form>
+      </Surface>
 
       {locations.length === 0 ? (
         <EmptyState
@@ -157,18 +159,18 @@ export default function LocalLocationsPage() {
           description="Добавьте комнату или зону внутри дома."
         />
       ) : (
-        <ul className="overflow-hidden rounded-2xl border border-border bg-card">
+        <ul className="surface animate-fade-up animate-fade-up-delay-2 overflow-hidden rounded-3xl">
           {locations.map((loc, i) => (
             <li
               key={loc.id}
-              className={`flex items-center gap-2 px-4 py-3 ${i > 0 ? "border-t border-border" : ""}`}
-              style={{ paddingLeft: `${16 + loc.depth * 16}px` }}
+              className={`flex items-center gap-3 px-4 py-3.5 transition hover:bg-white/[0.02] ${i > 0 ? "border-t border-border" : ""}`}
+              style={{ paddingLeft: `${16 + loc.depth * 14}px` }}
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+              <span className="icon-chip flex h-9 w-9 shrink-0 items-center justify-center">
                 <MapPin className="h-3.5 w-3.5" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="font-medium">{loc.name}</p>
+                <p className="font-medium tracking-tight">{loc.name}</p>
                 <p className="text-xs text-muted">
                   {LOCATION_TYPE_LABELS[loc.type]} · {loc.path}
                 </p>
@@ -178,7 +180,11 @@ export default function LocalLocationsPage() {
                   confirmMessage={`Удалить «${loc.name}» и все вложенные места? Коробки и вещи в них останутся, но без привязки к месту.`}
                   onDelete={() => handleDelete(loc.id)}
                 />
-              ) : null}
+              ) : (
+                <span className="rounded-lg bg-accent/10 px-2 py-1 text-[10px] font-semibold tracking-wide text-accent uppercase">
+                  корень
+                </span>
+              )}
             </li>
           ))}
         </ul>

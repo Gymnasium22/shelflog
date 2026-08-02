@@ -10,6 +10,7 @@ import { DeleteButton } from "@/local-app/ui/delete-button";
 import { EmptyState } from "@/local-app/ui/empty-state";
 import { NeedHousehold } from "@/local-app/ui/need-household";
 import { PageHeader } from "@/local-app/ui/page-header";
+import { Surface } from "@/local-app/ui/surface";
 import {
   createBox,
   deleteBox,
@@ -91,64 +92,63 @@ export default function LocalBoxesPage() {
   const locMap = new Map(locations.map((l) => [l.id, l.path]));
 
   if (!ready) {
-    return <div className="h-40 animate-pulse rounded-2xl bg-card" />;
+    return <div className="h-40 animate-pulse rounded-3xl bg-card/60" />;
   }
 
   if (!hasHousehold) return <NeedHousehold />;
 
   return (
-    <main className="space-y-8">
+    <main className="space-y-7">
       <PageHeader
         title="Коробки"
         description="Код, название и место — удобно для этикеток и переездов."
       />
 
-      <form
-        onSubmit={handleCreate}
-        className="space-y-4 rounded-2xl border border-border bg-card p-6"
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="box-code">Код</Label>
-            <Input
-              id="box-code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-              placeholder="A-01"
-              className="mt-1.5 font-mono uppercase"
-            />
+      <Surface className="animate-fade-up animate-fade-up-delay-1 space-y-4">
+        <form onSubmit={handleCreate} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="box-code">Код</Label>
+              <Input
+                id="box-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                required
+                placeholder="A-01"
+                className="mt-1.5 font-mono uppercase tracking-wider"
+              />
+            </div>
+            <div>
+              <Label htmlFor="box-name">Название (необязательно)</Label>
+              <Input
+                id="box-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Зима, документы…"
+                className="mt-1.5"
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="box-name">Название (необязательно)</Label>
-            <Input
-              id="box-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Зима, документы…"
-              className="mt-1.5"
-            />
-          </div>
-        </div>
-        {locations.length > 0 ? (
-          <div>
-            <Label htmlFor="box-loc">Место</Label>
-            <Select
-              id="box-loc"
-              value={locationId}
-              onChange={(e) => setLocationId(e.target.value)}
-            >
-              {locations.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {l.path}
-                </option>
-              ))}
-            </Select>
-          </div>
-        ) : null}
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
-        <Button type="submit">Создать коробку</Button>
-      </form>
+          {locations.length > 0 ? (
+            <div>
+              <Label htmlFor="box-loc">Место</Label>
+              <Select
+                id="box-loc"
+                value={locationId}
+                onChange={(e) => setLocationId(e.target.value)}
+              >
+                {locations.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.path}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          ) : null}
+          {error ? <p className="text-sm text-danger">{error}</p> : null}
+          <Button type="submit">Создать коробку</Button>
+        </form>
+      </Surface>
 
       {boxes.length === 0 ? (
         <EmptyState
@@ -157,17 +157,17 @@ export default function LocalBoxesPage() {
           description="Задайте код вроде A-01 — его удобно печатать на этикетке."
         />
       ) : (
-        <ul className="overflow-hidden rounded-2xl border border-border bg-card">
+        <ul className="surface animate-fade-up animate-fade-up-delay-2 overflow-hidden rounded-3xl">
           {boxes.map((box, i) => (
             <li
               key={box.id}
-              className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? "border-t border-border" : ""}`}
+              className={`flex items-center gap-3 px-4 py-3.5 transition hover:bg-white/[0.02] ${i > 0 ? "border-t border-border" : ""}`}
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/10 font-mono text-xs font-semibold text-accent">
+              <span className="icon-chip flex h-11 w-11 shrink-0 items-center justify-center font-mono text-xs font-bold tracking-wide">
                 {box.code.slice(0, 4)}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="font-medium">
+                <p className="font-medium tracking-tight">
                   <span className="font-mono text-accent">{box.code}</span>
                   {box.name ? (
                     <span className="text-muted"> — {box.name}</span>

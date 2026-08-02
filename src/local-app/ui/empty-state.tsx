@@ -8,15 +8,17 @@ type EmptyStateProps = {
 
 export function EmptyState({ icon, title, description }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card/40 px-6 py-12 text-center">
+    <div className="surface-dashed flex flex-col items-center justify-center gap-3 rounded-3xl px-6 py-14 text-center">
       {icon ? (
-        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 text-accent">
+        <div className="icon-chip mb-1 flex h-12 w-12 items-center justify-center">
           {icon}
         </div>
       ) : null}
-      <p className="text-sm font-medium">{title}</p>
+      <p className="text-[15px] font-semibold tracking-tight">{title}</p>
       {description ? (
-        <p className="max-w-sm text-sm text-muted">{description}</p>
+        <p className="max-w-sm text-sm leading-relaxed text-muted">
+          {description}
+        </p>
       ) : null}
     </div>
   );

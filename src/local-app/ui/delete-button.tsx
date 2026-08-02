@@ -23,8 +23,8 @@ export function DeleteButton({
       title={label}
       aria-label={label}
       className={cn(
-        "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition",
-        "hover:bg-danger/10 hover:text-danger",
+        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted transition duration-200",
+        "hover:bg-danger/12 hover:text-danger active:scale-95",
         className,
       )}
       onClick={() => {

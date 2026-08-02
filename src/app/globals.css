@@ -1,42 +1,63 @@
 @import "tailwindcss";
 
 /*
-  Dark-first theme: matches PWA shell / product feel.
-  Light mode only when the OS explicitly prefers light.
+  Premium dark-first system.
+  Light only when OS prefers light.
 */
 :root {
   color-scheme: dark;
-  --background: #0b0d12;
-  --foreground: #f4f4f5;
-  --muted: #9ca3af;
-  --card: #12151c;
-  --card-elevated: #181c26;
-  --border: #252a35;
-  --accent: #38bdf8;
-  --accent-foreground: #0b1220;
-  --ring: #38bdf8;
+  --background: #07080d;
+  --foreground: #f1f5f9;
+  --muted: #94a3b8;
+  --card: rgba(18, 22, 33, 0.72);
+  --card-solid: #121621;
+  --card-elevated: rgba(28, 34, 50, 0.88);
+  --border: rgba(148, 163, 184, 0.12);
+  --border-strong: rgba(148, 163, 184, 0.22);
+  --accent: #22d3ee;
+  --accent-secondary: #a78bfa;
+  --accent-foreground: #041016;
+  --ring: #22d3ee;
   --success: #34d399;
   --warning: #fbbf24;
-  --danger: #f87171;
-  --surface-glow: rgba(56, 189, 248, 0.12);
+  --danger: #fb7185;
+  --surface-glow: rgba(34, 211, 238, 0.14);
+  --surface-glow-2: rgba(167, 139, 250, 0.12);
+  --glass: rgba(12, 16, 28, 0.55);
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --shadow-glow: 0 0 0 1px rgba(34, 211, 238, 0.08),
+    0 12px 40px -16px rgba(0, 0, 0, 0.65),
+    0 0 48px -12px var(--surface-glow);
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 10px 30px -18px rgba(0, 0, 0, 0.7);
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     color-scheme: light;
-    --background: #f4f6f9;
+    --background: #f1f5f9;
     --foreground: #0f172a;
     --muted: #64748b;
-    --card: #ffffff;
-    --card-elevated: #ffffff;
-    --border: #e2e8f0;
-    --accent: #0284c7;
+    --card: rgba(255, 255, 255, 0.78);
+    --card-solid: #ffffff;
+    --card-elevated: rgba(255, 255, 255, 0.95);
+    --border: rgba(15, 23, 42, 0.08);
+    --border-strong: rgba(15, 23, 42, 0.14);
+    --accent: #0891b2;
+    --accent-secondary: #7c3aed;
     --accent-foreground: #ffffff;
-    --ring: #0ea5e9;
+    --ring: #06b6d4;
     --success: #059669;
     --warning: #d97706;
-    --danger: #dc2626;
-    --surface-glow: rgba(14, 165, 233, 0.08);
+    --danger: #e11d48;
+    --surface-glow: rgba(8, 145, 178, 0.1);
+    --surface-glow-2: rgba(124, 58, 237, 0.08);
+    --glass: rgba(255, 255, 255, 0.7);
+    --shadow-glow: 0 0 0 1px rgba(8, 145, 178, 0.1),
+      0 16px 40px -20px rgba(15, 23, 42, 0.18);
+    --shadow-card: 0 0 0 1px rgba(15, 23, 42, 0.04),
+      0 10px 28px -18px rgba(15, 23, 42, 0.12);
   }
 }
 
@@ -44,10 +65,11 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --color-card: var(--card);
+  --color-card: var(--card-solid);
   --color-card-elevated: var(--card-elevated);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-accent-secondary: var(--accent-secondary);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
   --color-success: var(--success);
@@ -60,22 +82,128 @@
 body {
   background-color: var(--background);
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, var(--surface-glow), transparent 55%),
-    radial-gradient(ellipse 40% 30% at 100% 0%, rgba(56, 189, 248, 0.04), transparent 50%);
+    radial-gradient(ellipse 90% 55% at 15% -10%, var(--surface-glow), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 5%, var(--surface-glow-2), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 110%, rgba(34, 211, 238, 0.05), transparent 55%);
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   min-height: 100dvh;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Native form controls follow theme */
 select,
 option {
-  background-color: var(--card);
+  background-color: var(--card-solid);
   color: var(--foreground);
 }
 
 ::selection {
   background: color-mix(in srgb, var(--accent) 35%, transparent);
   color: var(--foreground);
+}
+
+/* Reusable surfaces */
+.surface {
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.surface-elevated {
+  border: 1px solid var(--border-strong);
+  background: var(--card-elevated);
+  box-shadow: var(--shadow-glow);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.surface-dashed {
+  border: 1px dashed var(--border-strong);
+  background: color-mix(in srgb, var(--card-solid) 40%, transparent);
+}
+
+.text-gradient {
+  background: linear-gradient(
+    120deg,
+    var(--accent) 0%,
+    #67e8f9 40%,
+    var(--accent-secondary) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.85rem;
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--accent) 18%, transparent),
+    color-mix(in srgb, var(--accent-secondary) 12%, transparent)
+  );
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.badge-soft {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.badge-soft .dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* Subtle entrance for client pages */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-up-delay-1 {
+  animation-delay: 0.06s;
+}
+.animate-fade-up-delay-2 {
+  animation-delay: 0.12s;
+}
+.animate-fade-up-delay-3 {
+  animation-delay: 0.18s;
+}
+
+/* Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 35%, transparent) transparent;
 }

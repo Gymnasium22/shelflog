@@ -5,7 +5,7 @@ import { EmptyState } from "@/local-app/ui/empty-state";
 
 export function NeedHousehold() {
   return (
-    <div className="space-y-4">
+    <div className="animate-fade-up mx-auto max-w-md space-y-5">
       <EmptyState
         icon={<House className="h-5 w-5" />}
         title="Сначала создайте дом"
@@ -14,7 +14,7 @@ export function NeedHousehold() {
       <div className="flex justify-center">
         <Link
           href="/app"
-          className="inline-flex h-11 items-center justify-center rounded-xl bg-accent px-5 text-sm font-medium text-accent-foreground shadow-[0_0_20px_var(--surface-glow)] transition hover:opacity-90"
+          className="inline-flex h-11 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-cyan-400 px-5 text-sm font-semibold text-accent-foreground shadow-[0_10px_28px_-12px_var(--surface-glow)] transition hover:brightness-110"
         >
           На главную
         </Link>
