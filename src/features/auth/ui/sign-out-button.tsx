@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 
-import { signOut } from "@/features/auth/api/actions";
+import { signOutClient } from "@/features/auth/api/client-auth";
 import { Button } from "@/shared/ui/button";
 
 export function SignOutButton() {
@@ -12,7 +12,7 @@ export function SignOutButton() {
     <Button
       variant="secondary"
       disabled={pending}
-      onClick={() => start(() => signOut())}
+      onClick={() => start(() => signOutClient())}
     >
       {pending ? "Выходим…" : "Выйти"}
     </Button>

@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { ACTIVE_VALUE_STATUSES } from "@/entities/item/model/types";
 import type { Household } from "@/entities/household/model/types";
 import { createClient } from "@/shared/api/supabase/server";
@@ -17,8 +19,9 @@ import type {
 
 export async function loadDashboard(
   household: Household,
+  supabaseClient?: SupabaseClient,
 ): Promise<DashboardData> {
-  const supabase = await createClient();
+  const supabase = supabaseClient ?? (await createClient());
   const hid = household.id;
   const today = toDateOnly();
   const in30 = addDays(today, 30);

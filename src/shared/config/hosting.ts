@@ -4,3 +4,8 @@ export const isGitHubPages =
 
 /** Local-only mode: no Supabase, data in browser storage. */
 export const isLocalMode = isGitHubPages;
+
+/** Repo project pages base path — must match next.config basePath. */
+export const githubPagesBasePath = "/shelflog";
+
+export const basePath = isGitHubPages ? githubPagesBasePath : "";

@@ -1,29 +1,37 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/shared/api/supabase/server";
+import { RedirectIfAuthed } from "@/features/auth/ui/redirect-if-authed";
 import { getPublicEnvStatus } from "@/shared/config/env";
 import { DEFAULT_CURRENCY, DEFAULT_LOCALE } from "@/shared/config/constants";
 
-export default async function HomePage() {
-  const env = getPublicEnvStatus();
+export const dynamic = "force-dynamic";
 
-  if (env.ready) {
-    try {
-      const supabase = await createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        redirect("/app");
+const isGitHubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
+
+export default async function HomePage() {
+  if (!isGitHubPages) {
+    const env = getPublicEnvStatus();
+
+    if (env.ready) {
+      try {
+        const { createClient } = await import("@/shared/api/supabase/server");
+        const supabase = await createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          redirect("/app");
+        }
+      } catch {
+        // env incomplete or network — show landing
       }
-    } catch {
-      // env incomplete or network — show landing
     }
   }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col justify-center gap-10 px-6 py-16">
+      {isGitHubPages ? <RedirectIfAuthed /> : null}
       <div className="space-y-3">
         <p className="text-sm font-medium tracking-wide text-muted uppercase">
           ShelfLog
@@ -50,12 +58,14 @@ export default async function HomePage() {
         >
           Войти
         </Link>
-        <Link
-          href="/health"
-          className="inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-medium text-muted transition hover:text-foreground"
-        >
-          Проверка
-        </Link>
+        {!isGitHubPages ? (
+          <Link
+            href="/health"
+            className="inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-medium text-muted transition hover:text-foreground"
+          >
+            Проверка
+          </Link>
+        ) : null}
       </div>
 
       <p className="text-sm text-muted">

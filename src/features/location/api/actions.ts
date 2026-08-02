@@ -1,19 +1,16 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import {
   LOCATION_TYPES,
   type LocationType,
 } from "@/entities/location/model/types";
-import { createClient } from "@/shared/api/supabase/server";
-import { getActiveHousehold } from "@/shared/lib/household";
+import { createClient } from "@/shared/api/supabase/client";
+import { getActiveHouseholdClient } from "@/shared/lib/household-client";
+import type { ActionState } from "@/shared/types/action-state";
 
-export type ActionState = {
-  ok: boolean;
-  message: string | null;
-};
+export type { ActionState };
 
 const createSchema = z.object({
   name: z.string().trim().min(1, "Введите название").max(120),
@@ -41,12 +38,12 @@ export async function createLocationAction(
     };
   }
 
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) {
     return { ok: false, message: "Сначала создайте дом" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.from("storage_locations").insert({
     household_id: household.id,
     name: parsed.data.name,
@@ -59,18 +56,16 @@ export async function createLocationAction(
     return { ok: false, message: error.message };
   }
 
-  revalidatePath("/app/locations");
-  revalidatePath("/app");
   return { ok: true, message: "Место добавлено" };
 }
 
 export async function deleteLocationAction(id: string): Promise<ActionState> {
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) {
     return { ok: false, message: "Нет дома" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase
     .from("storage_locations")
     .delete()
@@ -81,7 +76,5 @@ export async function deleteLocationAction(id: string): Promise<ActionState> {
     return { ok: false, message: error.message };
   }
 
-  revalidatePath("/app/locations");
-  revalidatePath("/app");
   return { ok: true, message: "Удалено" };
 }

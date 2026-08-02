@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { InstallBanner } from "@/features/pwa/ui/install-banner";
 import { PwaRegister } from "@/features/pwa/ui/pwa-register";
+import { basePath } from "@/shared/config/hosting";
 
 import "./globals.css";
 
@@ -34,10 +35,24 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      {
+        url: `${basePath}/icons/icon-192.png`,
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: `${basePath}/icons/icon-512.png`,
+        sizes: "512x512",
+        type: "image/png",
+      },
     ],
-    apple: [{ url: "/icons/icon-180.png", sizes: "180x180", type: "image/png" }],
+    apple: [
+      {
+        url: `${basePath}/icons/icon-180.png`,
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
   },
   other: {
     "mobile-web-app-capable": "yes",

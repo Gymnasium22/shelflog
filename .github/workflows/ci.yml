@@ -40,5 +40,7 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Build
-        run: pnpm build
+      - name: Build GitHub Pages (static local app)
+        run: pnpm build:pages
+        env:
+          NEXT_PUBLIC_APP_URL: https://gymnasium22.github.io/shelflog

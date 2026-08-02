@@ -9,6 +9,8 @@ import { useEffect } from "react";
 export function PwaRegister() {
   useEffect(() => {
     if (process.env.NODE_ENV === "development") return;
+    // Serwist is disabled for the static GitHub Pages export.
+    if (process.env.NEXT_PUBLIC_GITHUB_PAGES === "true") return;
     if (!("serviceWorker" in navigator)) return;
 
     void navigator.serviceWorker

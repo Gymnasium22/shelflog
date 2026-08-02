@@ -1,17 +1,13 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { ITEM_STATUSES, type ItemStatus } from "@/entities/item/model/types";
-import { createClient } from "@/shared/api/supabase/server";
-import { getActiveHousehold } from "@/shared/lib/household";
+import { createClient } from "@/shared/api/supabase/client";
+import { getActiveHouseholdClient } from "@/shared/lib/household-client";
+import type { ActionState } from "@/shared/types/action-state";
 
-export type ActionState = {
-  ok: boolean;
-  message: string | null;
-};
+export type { ActionState };
 
 const itemSchema = z.object({
   name: z.string().trim().min(1, "Введите название").max(200),
@@ -73,12 +69,12 @@ export async function createItemAction(
     };
   }
 
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) {
     return { ok: false, message: "Сначала создайте дом" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -118,16 +114,14 @@ export async function createItemAction(
   }
 
   const item = data as { id: string };
-  revalidatePath("/app/items");
-  revalidatePath("/app");
-  redirect(`/app/items/${item.id}`);
+  return { ok: true, message: null, redirectTo: `/app/items/${item.id}` };
 }
 
 export async function deleteItemAction(id: string): Promise<ActionState> {
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) return { ok: false, message: "Нет дома" };
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase
     .from("items")
     .delete()
@@ -136,7 +130,5 @@ export async function deleteItemAction(id: string): Promise<ActionState> {
 
   if (error) return { ok: false, message: error.message };
 
-  revalidatePath("/app/items");
-  revalidatePath("/app");
   return { ok: true, message: "Удалено" };
 }

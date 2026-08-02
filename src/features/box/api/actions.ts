@@ -1,16 +1,12 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { createClient } from "@/shared/api/supabase/server";
-import { getActiveHousehold } from "@/shared/lib/household";
+import { createClient } from "@/shared/api/supabase/client";
+import { getActiveHouseholdClient } from "@/shared/lib/household-client";
+import type { ActionState } from "@/shared/types/action-state";
 
-export type ActionState = {
-  ok: boolean;
-  message: string | null;
-};
+export type { ActionState };
 
 const boxSchema = z.object({
   code: z.string().trim().min(1, "Укажите номер/код").max(40),
@@ -40,12 +36,12 @@ export async function createBoxAction(
     };
   }
 
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) {
     return { ok: false, message: "Сначала создайте дом" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("boxes")
     .insert({
@@ -67,16 +63,14 @@ export async function createBoxAction(
   }
 
   const box = data as { id: string };
-  revalidatePath("/app/boxes");
-  revalidatePath("/app");
-  redirect(`/app/boxes/${box.id}`);
+  return { ok: true, message: null, redirectTo: `/app/boxes/${box.id}` };
 }
 
 export async function deleteBoxAction(id: string): Promise<ActionState> {
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) return { ok: false, message: "Нет дома" };
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase
     .from("boxes")
     .delete()
@@ -85,7 +79,5 @@ export async function deleteBoxAction(id: string): Promise<ActionState> {
 
   if (error) return { ok: false, message: error.message };
 
-  revalidatePath("/app/boxes");
-  revalidatePath("/app");
   return { ok: true, message: "Удалено" };
 }

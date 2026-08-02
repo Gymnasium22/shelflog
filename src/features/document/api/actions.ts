@@ -1,7 +1,5 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import {
@@ -11,14 +9,12 @@ import {
   MAX_DOCUMENT_BYTES,
   type DocumentType,
 } from "@/entities/document/model/types";
-import { createClient } from "@/shared/api/supabase/server";
-import { getActiveHousehold } from "@/shared/lib/household";
+import { createClient } from "@/shared/api/supabase/client";
+import { getActiveHouseholdClient } from "@/shared/lib/household-client";
 import { sanitizeFileName } from "@/shared/lib/files";
+import type { ActionState } from "@/shared/types/action-state";
 
-export type ActionState = {
-  ok: boolean;
-  message: string | null;
-};
+export type { ActionState };
 
 const metaSchema = z.object({
   title: z.string().trim().min(1, "Введите название").max(200),
@@ -51,7 +47,6 @@ export async function createDocumentAction(
   const mime = file.type || "application/octet-stream";
   if (
     !(ALLOWED_DOCUMENT_MIME as readonly string[]).includes(mime) &&
-    // Some browsers send empty type for HEIC
     !file.name.toLowerCase().match(/\.(heic|heif)$/)
   ) {
     return {
@@ -66,9 +61,7 @@ export async function createDocumentAction(
       ? "image/heic"
       : mime;
 
-  if (
-    !(ALLOWED_DOCUMENT_MIME as readonly string[]).includes(resolvedMime)
-  ) {
+  if (!(ALLOWED_DOCUMENT_MIME as readonly string[]).includes(resolvedMime)) {
     return {
       ok: false,
       message: "Допустимы PDF, JPEG, PNG, WEBP, HEIC",
@@ -94,12 +87,12 @@ export async function createDocumentAction(
     };
   }
 
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) {
     return { ok: false, message: "Сначала создайте дом" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -112,11 +105,9 @@ export async function createDocumentAction(
   const safeName = sanitizeFileName(file.name || "file");
   const storagePath = `${household.id}/${documentId}_${safeName}`;
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-
   const { error: uploadError } = await supabase.storage
     .from(DOCUMENTS_BUCKET)
-    .upload(storagePath, buffer, {
+    .upload(storagePath, file, {
       contentType: resolvedMime,
       upsert: false,
     });
@@ -154,19 +145,18 @@ export async function createDocumentAction(
   }
 
   const row = data as { id: string };
-  revalidatePath("/app/documents");
-  revalidatePath("/app");
-  if (parsed.data.itemId) {
-    revalidatePath(`/app/items/${parsed.data.itemId}`);
-  }
-  redirect(`/app/documents/${row.id}`);
+  return {
+    ok: true,
+    message: null,
+    redirectTo: `/app/documents/${row.id}`,
+  };
 }
 
 export async function deleteDocumentAction(id: string): Promise<ActionState> {
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) return { ok: false, message: "Нет дома" };
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data: row } = await supabase
     .from("documents")
     .select("id, storage_path")
@@ -187,8 +177,6 @@ export async function deleteDocumentAction(id: string): Promise<ActionState> {
 
   await supabase.storage.from(DOCUMENTS_BUCKET).remove([doc.storage_path]);
 
-  revalidatePath("/app/documents");
-  revalidatePath("/app");
   return { ok: true, message: "Удалено" };
 }
 
@@ -196,14 +184,14 @@ export async function getDocumentSignedUrl(
   storagePath: string,
   expiresIn = 3600,
 ): Promise<string | null> {
-  const household = await getActiveHousehold();
+  const household = await getActiveHouseholdClient();
   if (!household) return null;
 
   if (!storagePath.startsWith(`${household.id}/`)) {
     return null;
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase.storage
     .from(DOCUMENTS_BUCKET)
     .createSignedUrl(storagePath, expiresIn);

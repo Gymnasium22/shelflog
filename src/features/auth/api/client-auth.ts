@@ -1,7 +1,6 @@
-"use server";
+"use client";
 
-import { redirect } from "next/navigation";
-
+import { createClient } from "@/shared/api/supabase/client";
 import {
   getAppUrl,
   invalidFormState,
@@ -12,7 +11,6 @@ import {
   safeNextPath,
   type AuthActionState,
 } from "@/features/auth/api/auth-shared";
-import { createClient } from "@/shared/api/supabase/server";
 
 export type { AuthActionState };
 
@@ -29,14 +27,18 @@ export async function signInWithPassword(
     );
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     return { ok: false, message: mapAuthError(error.message) };
   }
 
-  redirect(safeNextPath(formData.get("next")));
+  return {
+    ok: true,
+    message: null,
+    redirectTo: safeNextPath(formData.get("next")),
+  } as AuthActionState & { redirectTo?: string };
 }
 
 export async function signUpWithPassword(
@@ -52,7 +54,7 @@ export async function signUpWithPassword(
     );
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -70,7 +72,11 @@ export async function signUpWithPassword(
   }
 
   if (data.session) {
-    redirect(safeNextPath(formData.get("next")));
+    return {
+      ok: true,
+      message: null,
+      redirectTo: safeNextPath(formData.get("next")),
+    } as AuthActionState & { redirectTo?: string };
   }
 
   return {
@@ -94,7 +100,7 @@ export async function signInWithMagicLink(
   }
 
   const next = safeNextPath(formData.get("next"));
-  const supabase = await createClient();
+  const supabase = createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
     options: {
@@ -114,12 +120,8 @@ export async function signInWithMagicLink(
   };
 }
 
-export async function signOut() {
-  const supabase = await createClient();
+export async function signOutClient() {
+  const supabase = createClient();
   await supabase.auth.signOut();
-  redirect("/login");
-}
-
-export async function getEmptyAuthState(): Promise<AuthActionState> {
-  return { ok: true, message: null };
+  window.location.assign("/login");
 }

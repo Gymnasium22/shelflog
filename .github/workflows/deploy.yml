@@ -1,8 +1,8 @@
 name: Deploy to Vercel
 
+# Full Supabase/Vercel deploy — run manually when secrets and backend are ready.
+# Default public deploy is GitHub Pages (pages.yml) with local-only static app.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

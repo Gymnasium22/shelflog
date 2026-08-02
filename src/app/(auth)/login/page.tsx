@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 
+import { RedirectIfAuthed } from "@/features/auth/ui/redirect-if-authed";
 import { LoginForm } from "@/features/auth/ui/login-form";
-import { createClient } from "@/shared/api/supabase/server";
+
+export const dynamic = "force-dynamic";
+
+const isGitHubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
 
 export const metadata = {
   title: "Вход",
@@ -18,17 +22,21 @@ export default async function LoginPage({ searchParams }: Props) {
       ? sp.next
       : "/app";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!isGitHubPages) {
+    const { createClient } = await import("@/shared/api/supabase/server");
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  if (user) {
-    redirect(next);
+    if (user) {
+      redirect(next);
+    }
   }
 
   return (
     <div className="space-y-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
+      {isGitHubPages ? <RedirectIfAuthed next={next} /> : null}
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">Вход</h1>
         <p className="text-sm text-muted">

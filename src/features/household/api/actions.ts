@@ -1,15 +1,11 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
-import { createClient } from "@/shared/api/supabase/server";
+import { createClient } from "@/shared/api/supabase/client";
+import type { ActionState } from "@/shared/types/action-state";
 
-export type ActionState = {
-  ok: boolean;
-  message: string | null;
-};
+export type { ActionState };
 
 const nameSchema = z
   .string()
@@ -26,7 +22,7 @@ export async function createHouseholdAction(
     return { ok: false, message: parsed.error.errors[0]?.message ?? "Ошибка" };
   }
 
-  const supabase = await createClient();
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -44,8 +40,5 @@ export async function createHouseholdAction(
   }
 
   void data;
-  revalidatePath("/app");
-  redirect("/app");
+  return { ok: true, message: null, redirectTo: "/app" };
 }
-
-
