@@ -6,10 +6,10 @@ type Variant = "primary" | "secondary" | "ghost";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-accent text-accent-foreground hover:opacity-90 disabled:opacity-50",
+    "bg-accent text-accent-foreground shadow-[0_0_20px_var(--surface-glow)] hover:opacity-90 disabled:opacity-50",
   secondary:
-    "border border-border bg-card hover:bg-background disabled:opacity-50",
-  ghost: "hover:bg-border/40 disabled:opacity-50",
+    "border border-border bg-card hover:bg-card-elevated disabled:opacity-50",
+  ghost: "hover:bg-card disabled:opacity-50",
 };
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

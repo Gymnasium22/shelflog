@@ -1,26 +1,42 @@
 @import "tailwindcss";
 
+/*
+  Dark-first theme: matches PWA shell / product feel.
+  Light mode only when the OS explicitly prefers light.
+*/
 :root {
-  --background: #fafafa;
-  --foreground: #0a0a0a;
-  --muted: #737373;
-  --card: #ffffff;
-  --border: #e5e5e5;
-  --accent: #171717;
-  --accent-foreground: #fafafa;
-  --ring: #a3a3a3;
+  color-scheme: dark;
+  --background: #0b0d12;
+  --foreground: #f4f4f5;
+  --muted: #9ca3af;
+  --card: #12151c;
+  --card-elevated: #181c26;
+  --border: #252a35;
+  --accent: #38bdf8;
+  --accent-foreground: #0b1220;
+  --ring: #38bdf8;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --surface-glow: rgba(56, 189, 248, 0.12);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #fafafa;
-    --muted: #a3a3a3;
-    --card: #171717;
-    --border: #262626;
-    --accent: #fafafa;
-    --accent-foreground: #171717;
-    --ring: #525252;
+    color-scheme: light;
+    --background: #f4f6f9;
+    --foreground: #0f172a;
+    --muted: #64748b;
+    --card: #ffffff;
+    --card-elevated: #ffffff;
+    --border: #e2e8f0;
+    --accent: #0284c7;
+    --accent-foreground: #ffffff;
+    --ring: #0ea5e9;
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --surface-glow: rgba(14, 165, 233, 0.08);
   }
 }
 
@@ -29,16 +45,37 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-card: var(--card);
+  --color-card-elevated: var(--card-elevated);
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--surface-glow), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 100% 0%, rgba(56, 189, 248, 0.04), transparent 50%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  min-height: 100dvh;
+}
+
+/* Native form controls follow theme */
+select,
+option {
+  background-color: var(--card);
+  color: var(--foreground);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--foreground);
 }

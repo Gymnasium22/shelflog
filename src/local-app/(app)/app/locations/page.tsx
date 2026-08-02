@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MapPin } from "lucide-react";
 
 import {
   LOCATION_TYPE_LABELS,
@@ -8,6 +9,8 @@ import {
   type LocationType,
   type StorageLocation,
 } from "@/entities/location/model/types";
+import { EmptyState } from "@/local-app/ui/empty-state";
+import { PageHeader } from "@/local-app/ui/page-header";
 import {
   createLocation,
   getHousehold,
@@ -16,20 +19,25 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { Select } from "@/shared/ui/select";
 
 export default function LocalLocationsPage() {
   const [locations, setLocations] = useState<StorageLocation[]>([]);
   const [name, setName] = useState("");
   const [type, setType] = useState<LocationType>("room");
   const [parentId, setParentId] = useState<string>("");
+  const [hasHousehold, setHasHousehold] = useState(true);
 
   useEffect(() => {
     const h = getHousehold();
-    if (h) {
-      const locs = listLocations(h.id);
-      setLocations(locs);
-      if (locs[0]) setParentId(locs[0].id);
+    if (!h) {
+      setHasHousehold(false);
+      return;
     }
+    setHasHousehold(true);
+    const locs = listLocations(h.id);
+    setLocations(locs);
+    if (locs[0]) setParentId(locs[0].id);
   }, []);
 
   function refresh() {
@@ -51,12 +59,22 @@ export default function LocalLocationsPage() {
     refresh();
   }
 
+  if (!hasHousehold) {
+    return (
+      <EmptyState
+        icon={<MapPin className="h-5 w-5" />}
+        title="Сначала создайте дом"
+        description="На главной укажите название — после этого можно строить дерево мест."
+      />
+    );
+  }
+
   return (
     <main className="space-y-8">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-semibold tracking-tight">Места хранения</h1>
-        <p className="text-sm text-muted">Дерево мест — данные в localStorage.</p>
-      </div>
+      <PageHeader
+        title="Места хранения"
+        description="Комнаты, шкафы, полки — иерархия на этом устройстве."
+      />
 
       <form
         onSubmit={handleCreate}
@@ -70,57 +88,71 @@ export default function LocalLocationsPage() {
             onChange={(e) => setName(e.target.value)}
             required
             placeholder="Кухня, шкаф…"
+            className="mt-1.5"
           />
         </div>
         <div>
           <Label htmlFor="loc-type">Тип</Label>
-          <select
+          <Select
             id="loc-type"
             value={type}
             onChange={(e) => setType(e.target.value as LocationType)}
-            className="mt-1.5 h-11 w-full rounded-xl border border-border bg-background px-3 text-sm"
           >
             {LOCATION_TYPES.map((t) => (
               <option key={t} value={t}>
                 {LOCATION_TYPE_LABELS[t]}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         {locations.length > 0 ? (
           <div>
             <Label htmlFor="loc-parent">Внутри</Label>
-            <select
+            <Select
               id="loc-parent"
               value={parentId}
               onChange={(e) => setParentId(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-xl border border-border bg-background px-3 text-sm"
             >
               {locations.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.path}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         ) : null}
         <Button type="submit">Добавить место</Button>
       </form>
 
-      <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
-        {locations.map((loc) => (
-          <li
-            key={loc.id}
-            className="px-4 py-3"
-            style={{ paddingLeft: `${16 + loc.depth * 16}px` }}
-          >
-            <p className="font-medium">{loc.name}</p>
-            <p className="text-xs text-muted">
-              {LOCATION_TYPE_LABELS[loc.type]} · {loc.path}
-            </p>
-          </li>
-        ))}
-      </ul>
+      {locations.length === 0 ? (
+        <EmptyState
+          icon={<MapPin className="h-5 w-5" />}
+          title="Мест пока нет"
+          description="Добавьте комнату или зону — она станет корнем дерева хранения."
+        />
+      ) : (
+        <ul className="overflow-hidden rounded-2xl border border-border bg-card">
+          {locations.map((loc, i) => (
+            <li
+              key={loc.id}
+              className={`px-4 py-3 ${i > 0 ? "border-t border-border" : ""}`}
+              style={{ paddingLeft: `${16 + loc.depth * 16}px` }}
+            >
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                  <MapPin className="h-3.5 w-3.5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-medium">{loc.name}</p>
+                  <p className="text-xs text-muted">
+                    {LOCATION_TYPE_LABELS[loc.type]} · {loc.path}
+                  </p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   );
 }
