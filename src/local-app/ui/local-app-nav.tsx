@@ -26,9 +26,12 @@ export function LocalAppNav() {
   return (
     <nav className="flex gap-1 overflow-x-auto pb-0.5">
       {links.map((link) => {
+        const path = pathname.endsWith("/") && pathname.length > 1
+          ? pathname.slice(0, -1)
+          : pathname;
         const active = link.exact
-          ? pathname === link.href || pathname === `${link.href}/`
-          : pathname === link.href || pathname.startsWith(`${link.href}/`);
+          ? path === link.href
+          : path === link.href || path.startsWith(`${link.href}/`);
         const Icon = link.icon;
 
         return (

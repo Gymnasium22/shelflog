@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ArrowRight, Box, MapPin, Package, Plus } from "lucide-react";
 
 import type { Household } from "@/entities/household/model/types";
@@ -15,23 +16,44 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 
 export default function LocalDashboardPage() {
-  const [household, setHousehold] = useState<Household | null>(null);
+  const pathname = usePathname();
+  const [household, setHousehold] = useState<Household | null | undefined>(
+    undefined,
+  );
   const [name, setName] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [counts, setCounts] = useState({ locations: 0, boxes: 0, items: 0 });
 
   useEffect(() => {
     const h = getHousehold();
     setHousehold(h);
     if (h) setCounts(getCounts(h.id));
-  }, []);
+  }, [pathname]);
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return;
-    const h = createHousehold(name);
-    setHousehold(h);
-    setCounts(getCounts(h.id));
-    setName("");
+    setError(null);
+    try {
+      const h = createHousehold(name);
+      setHousehold(h);
+      setCounts(getCounts(h.id));
+      setName("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось создать дом");
+    }
+  }
+
+  if (household === undefined) {
+    return (
+      <main className="space-y-4">
+        <div className="h-8 w-48 animate-pulse rounded-lg bg-card" />
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="h-28 animate-pulse rounded-2xl bg-card" />
+          <div className="h-28 animate-pulse rounded-2xl bg-card" />
+          <div className="h-28 animate-pulse rounded-2xl bg-card" />
+        </div>
+      </main>
+    );
   }
 
   if (!household) {
@@ -64,6 +86,7 @@ export default function LocalDashboardPage() {
               className="mt-1.5"
             />
           </div>
+          {error ? <p className="text-sm text-danger">{error}</p> : null}
           <Button type="submit" className="w-full">
             Создать дом
           </Button>
